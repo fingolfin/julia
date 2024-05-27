@@ -355,6 +355,8 @@ JL_DLLEXPORT void *jl_task_stack_buffer(jl_task_t *task, size_t *size, int *ptid
     return (void *)((char *)task->stkbuf + off);
 }
 
+extern const size_t jl_guard_size; // from gc-stacks.c
+
 JL_DLLEXPORT void jl_active_task_stack(jl_task_t *task,
                                        char **active_start, char **active_end,
                                        char **total_start, char **total_end)
@@ -382,7 +384,11 @@ JL_DLLEXPORT void jl_active_task_stack(jl_task_t *task,
             *active_start += ROOT_TASK_STACK_ADJUSTMENT;
             *total_start += ROOT_TASK_STACK_ADJUSTMENT;
         }
+        else
 #endif
+        {
+            *active_start += jl_guard_size;
+        }
 
         *total_end = *active_end = (char*)task->stkbuf + task->bufsz;
 #ifdef COPY_STACKS
